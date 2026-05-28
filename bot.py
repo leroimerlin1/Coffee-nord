@@ -28,7 +28,7 @@ CHANNEL_LINK = "https://t.me/+xkLrkV6xQBQ2OTQ0"
 MINI_APP_URL = "https://leroimerlin1.github.io/Coffee-nord/"
 IMAGE_WELCOME = "chat1.png"
 ADMIN_ID = 7457384429
-DB_PATH = "users.db"  # Fichier base de données (remplace users.json)
+DB_PATH = "users.db"
 
 DAILY_MESSAGE = """✅ Les commandes sont ouvertes 📦
 
@@ -37,30 +37,6 @@ DAILY_MESSAGE = """✅ Les commandes sont ouvertes 📦
 🚚 Livraison Dispo ✅
 
 Fait /start pour relancer le bot 🤖"""
-
-INFO_TEXT = """Information de Bart.Coffee76
-
-Pour toutes commande, une carte d'identité 🪪 est nécessaire et une photo 📸 de vous.
-
-Contact secrétaire : @sav_Bart76
-
-Info Livraison 🚚
-
-Zone de livraison
-76 / 27 / 14
-
-• Sur Rouen : 70€
-• Moins de 10 km de Rouen : 100€
-• Supérieur à 10 km : 150€
-• Supérieur à 25 km : 270€
-
-Frais de livraison obligatoire s'il n'y a pas de tournée !
-
-Info Meet-up 📍
-
-Nous sommes situé sur Rouen Rive Gauche 📍
-
-50€ de commande minimum pour venir sur place"""
 
 # =============================================================
 # LOGGING
@@ -114,7 +90,6 @@ def get_main_menu_keyboard():
    keyboard = [
        [
            InlineKeyboardButton("📩 Contact", callback_data="contact"),
-           InlineKeyboardButton("ℹ️ Informations", callback_data="info"),
        ],
        [
            InlineKeyboardButton("🛍 Ouvrir la boutique", web_app=WebAppInfo(url=MINI_APP_URL))
@@ -130,15 +105,20 @@ async def send_welcome_menu(chat_id: int, context: ContextTypes.DEFAULT_TYPE):
                chat_id=chat_id,
                photo=photo_file,
                caption=(
-                   "Bienvenue chez Bart Coffee76 🔥\n\n"
-                   "Choisis une option ci-dessous :"
+                   "Bonjour 👋, Bienvenue à tous sur notre nouveau bot 🤖🆕\n\n"
+                   "Cliquez sur la mini app 📲 pour acceder aux menus / prix et videos 📸\n\n"
+                   "Tous les produits sont mis a jour en temps reel si ils ont dispo sur le site c'est dispo ✅🆕"
                ),
                reply_markup=get_main_menu_keyboard()
            )
    except FileNotFoundError:
        await context.bot.send_message(
            chat_id=chat_id,
-           text="Bienvenue chez Bart Coffee76 🔥\n\nChoisis une option :",
+           text=(
+               "Bonjour 👋, Bienvenue à tous sur notre nouveau bot 🤖🆕\n\n"
+               "Cliquez sur la mini app 📲 pour acceder aux menus / prix et videos 📸\n\n"
+               "Tous les produits sont mis a jour en temps reel si ils ont dispo sur le site c'est dispo ✅🆕"
+           ),
            reply_markup=get_main_menu_keyboard()
        )
 
@@ -269,25 +249,12 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
        except Exception:
            pass
        keyboard = [
-           [InlineKeyboardButton("💬 Contacter le support", url="https://t.me/sav_Bart76")],
+           [InlineKeyboardButton("💬 Contacter le support", url="https://t.me/Scff59")],
            [InlineKeyboardButton("← Retour", callback_data="back")]
        ]
        await context.bot.send_message(
            chat_id=query.message.chat_id,
            text="Tu veux parler à l'équipe ?\n\nClique ci-dessous pour ouvrir le chat privé :",
-           reply_markup=InlineKeyboardMarkup(keyboard)
-       )
-       return
-
-   if data == "info":
-       try:
-           await query.message.delete()
-       except Exception:
-           pass
-       keyboard = [[InlineKeyboardButton("← Retour", callback_data="back")]]
-       await context.bot.send_message(
-           chat_id=query.message.chat_id,
-           text=INFO_TEXT,
            reply_markup=InlineKeyboardMarkup(keyboard)
        )
        return
@@ -314,7 +281,7 @@ def main():
        name="daily_open_message"
    )
 
-   print("Bot démarré → Bart Coffee76  |  Image : chat.jpg")
+   print("Bot démarré → Bart Coffee76  |  Image : chat1.png")
    app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
