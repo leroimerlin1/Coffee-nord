@@ -22,7 +22,8 @@ from telegram.ext import (
 # CONFIGURATION
 # =============================================================
 
-TOKEN = "8586174802:AAEJ294yeBBufP9O29wJOHHTdFoLciQtmgE"
+TOKEN = "8881347748:AAHyTDo0RKse8NUfkBMpncqVhDGk-iRJ_xk
+"
 CHANNEL_LINK = "https://t.me/+xkLrkV6xQBQ2OTQ0"
 MINI_APP_URL = "https://leroimerlin1.github.io/Dry76/"
 IMAGE_WELCOME = "chat.jpg"
