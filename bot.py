@@ -25,8 +25,8 @@ from telegram.ext import (
 TOKEN = "8881347748:AAHyTDo0RKse8NUfkBMpncqVhDGk-iRJ_xk
 "
 CHANNEL_LINK = "https://t.me/+xkLrkV6xQBQ2OTQ0"
-MINI_APP_URL = "https://leroimerlin1.github.io/Dry76/"
-IMAGE_WELCOME = "chat.jpg"
+MINI_APP_URL = "https://leroimerlin1.github.io/Coffee-nord/"
+IMAGE_WELCOME = "chat1.png"
 ADMIN_ID = 7457384429
 DB_PATH = "users.db"  # Fichier base de données (remplace users.json)
 
