@@ -23,7 +23,7 @@ from telegram.ext import (
 # =============================================================
 
 TOKEN = "8881347748:AAHyTDo0RKse8NUfkBMpncqVhDGk-iRJ_xk"
-"
+
 CHANNEL_LINK = "https://t.me/+xkLrkV6xQBQ2OTQ0"
 MINI_APP_URL = "https://leroimerlin1.github.io/Coffee-nord/"
 IMAGE_WELCOME = "chat1.png"
