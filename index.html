@@ -167,6 +167,14 @@ body::after{
 input[type="time"],input[type="text"],textarea{width:100%;padding:12px;border-radius:8px;border:1.5px solid rgba(200,146,42,0.25);background:rgba(20,10,4,0.8);color:var(--cream);font-size:0.9rem;font-family:'Nunito',sans-serif;outline:none;}
 input:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 8px rgba(200,146,42,0.2);}
 textarea{min-height:80px;resize:vertical;}
+/* Info livraison banner */
+.delivery-info-banner{background:linear-gradient(135deg,rgba(200,146,42,0.10),rgba(204,0,0,0.07));border:1.5px solid rgba(200,146,42,0.4);border-radius:10px;padding:14px 16px;margin-bottom:14px;position:relative;overflow:hidden;}
+.delivery-info-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0.7;}
+.delivery-info-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.delivery-info-row:last-child{margin-bottom:0;}
+.delivery-info-row span:first-child{font-size:1rem;flex-shrink:0;margin-top:1px;}
+.delivery-info-row span:last-child{color:var(--cream);font-size:0.86rem;font-weight:800;line-height:1.5;}
+.delivery-info-title{font-family:'Bangers',cursive;font-size:1rem;letter-spacing:2px;color:var(--gold-light);margin-bottom:10px;text-align:center;}
 #submit-order-btn{width:100%;padding:16px;background:linear-gradient(135deg,var(--red-deep),var(--red));color:var(--cream);border:1.5px solid rgba(200,146,42,0.4);border-radius:12px;font-size:1.2rem;font-weight:400;margin-top:20px;cursor:pointer;box-shadow:0 0 20px rgba(204,0,0,0.4);font-family:'Bangers',cursive;letter-spacing:3px;}
 #submit-order-btn:disabled{background:rgba(40,20,8,0.8);color:#555;cursor:not-allowed;}
 #infos-page{display:none;padding:16px 14px 110px;}
@@ -257,7 +265,9 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
 .admin-input{width:100%;padding:11px 14px;border-radius:8px;border:1.5px solid rgba(200,146,42,0.2);background:rgba(20,10,4,0.7);color:var(--cream);font-size:0.9rem;font-family:'Nunito',sans-serif;outline:none;transition:border-color 0.2s;}
 .admin-input:focus{border-color:var(--gold);box-shadow:0 0 8px rgba(200,146,42,0.2);}
 .admin-textarea{min-height:70px;resize:vertical;}
-.admin-qty-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center;margin-bottom:8px;}
+.admin-qty-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:center;margin-bottom:8px;}
+.admin-qty-type{height:40px;font-size:11px;padding:0 8px;font-family:'Nunito',sans-serif;font-weight:700;background:rgba(20,10,4,0.7);border:1.5px solid rgba(200,146,42,0.2);border-radius:8px;color:var(--cream);appearance:none;-webkit-appearance:none;cursor:pointer;outline:none;}
+.admin-qty-type option{background:#3D2210;color:var(--cream);}
 .admin-qty-del{width:34px;height:34px;background:rgba(204,0,0,0.15);border:1.5px solid rgba(204,0,0,0.4);color:var(--red-light);border-radius:8px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .admin-add-qty{width:100%;padding:10px;background:rgba(200,146,42,0.07);border:1.5px dashed rgba(200,146,42,0.3);color:var(--gold-light);border-radius:8px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;margin-top:4px;}
 .admin-form-actions{display:flex;gap:10px;margin-top:18px;}
@@ -283,6 +293,10 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
 .admin-add-btn{width:100%;padding:14px;background:linear-gradient(135deg,rgba(204,0,0,0.12),rgba(200,146,42,0.08));border:2px dashed rgba(200,146,42,0.4);color:var(--gold);border-radius:12px;font-family:'Bangers',cursive;font-size:1.1rem;letter-spacing:2px;cursor:pointer;margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:10px;}
 .admin-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--wood-plank);border:1.5px solid rgba(200,146,42,0.5);color:var(--gold-light);padding:12px 24px;border-radius:10px;font-family:'Bangers',cursive;font-size:1rem;letter-spacing:2px;z-index:999999;white-space:nowrap;opacity:0;transition:opacity 0.3s;pointer-events:none;box-shadow:0 4px 24px rgba(0,0,0,0.8),0 0 16px rgba(200,146,42,0.2);}
 .admin-toast.show{opacity:1;}
+/* Badge type sur chaque ligne de quantité dans le panier */
+.qty-type-badge{display:inline-block;font-size:0.65rem;font-weight:800;padding:2px 7px;border-radius:4px;margin-left:6px;vertical-align:middle;}
+.qty-type-badge.sur-place{background:rgba(200,146,42,0.12);border:1px solid rgba(200,146,42,0.4);color:var(--gold-light);}
+.qty-type-badge.livraison{background:rgba(41,182,246,0.1);border:1px solid rgba(41,182,246,0.35);color:#29b6f6;}
   </style>
 </head>
 <body>
@@ -384,6 +398,12 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
       </div>
       <div class="admin-field">
         <label class="admin-label">Quantités & Prix</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;margin-bottom:6px;">
+          <span style="font-size:0.72rem;font-weight:800;color:var(--cream-dim);padding:0 4px;">QTÉ</span>
+          <span style="font-size:0.72rem;font-weight:800;color:var(--cream-dim);padding:0 4px;">PRIX</span>
+          <span style="font-size:0.72rem;font-weight:800;color:var(--cream-dim);padding:0 4px;">TYPE</span>
+          <span></span>
+        </div>
         <div id="qty-rows"></div>
         <button class="admin-add-qty" onclick="addQtyRow()">+ Ajouter une quantité</button>
       </div>
@@ -460,18 +480,48 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
       <div class="questionnaire">
         <div class="question">
           <span class="question-label">Mode de récupération :</span>
-          <button class="option-btn" data-type="pickup">Venir sur place</button>
-          <button class="option-btn" data-type="delivery">Livraison</button>
-          <button class="option-btn" data-type="shipping">Envoi 📦🌟✅</button>
+          <button class="option-btn" data-type="pickup">📍 Venir sur place</button>
+          <button class="option-btn" data-type="delivery">🚚 Livraison</button>
+          <button class="option-btn" data-type="shipping">📦 Envoi postal 🌟✅</button>
         </div>
+
+        <!-- SUR PLACE -->
         <div id="pickup-questions" style="display:none">
           <div class="question"><span class="question-label">Pour quelle heure ?</span><input type="time" id="pickup-time"></div>
         </div>
+
+        <!-- LIVRAISON -->
         <div id="delivery-questions" style="display:none">
+          <!-- Bannière info livraison -->
+          <div class="delivery-info-banner">
+            <div class="delivery-info-title">📋 INFOS LIVRAISON</div>
+            <div class="delivery-info-row">
+              <span>📍</span>
+              <span>Zones couvertes : <strong style="color:var(--red-light)">59 · 62 · 02 · 🇧🇪 BE</strong></span>
+            </div>
+            <div class="delivery-info-row">
+              <span>🕐</span>
+              <span>Horaires de livraison : <strong style="color:var(--gold-light)">12h – 23h</strong></span>
+            </div>
+            <div class="delivery-info-row">
+              <span>💶</span>
+              <span>Paiement en <strong style="color:var(--gold-light)">espèces uniquement</strong></span>
+            </div>
+            <div class="delivery-info-row">
+              <span>📞</span>
+              <span>Confirmez votre commande en PV sur <strong style="color:#29b6f6">@Scff59</strong> avant la livraison</span>
+            </div>
+            <div class="delivery-info-row">
+              <span>⚡</span>
+              <span style="color:var(--green-light)">Livraison rapide & discrète 🔐</span>
+            </div>
+          </div>
           <div class="question"><span class="question-label">Heure souhaitée</span><input type="time" id="delivery-time"></div>
           <div class="question"><span class="question-label">Adresse complète</span><input type="text" id="delivery-address" placeholder="Rue, numéro, ville..."></div>
           <div class="question"><span class="question-label">Précisions (étage, code, etc.)</span><textarea id="delivery-details" placeholder="Interphone, digicode, remarques..."></textarea></div>
         </div>
+
+        <!-- ENVOI POSTAL -->
         <div id="shipping-questions" style="display:none">
           <div class="crypto-block">
             <div class="crypto-title">💳 PAIEMENT EN CRYPTO EN PV ✍️</div>
@@ -484,21 +534,18 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
           <div class="question"><span class="question-label">Adresse postale complète</span><input type="text" id="shipping-address" placeholder="Nom, Rue, Code postal, Ville..."></div>
           <div class="question"><span class="question-label">Précisions supplémentaires</span><textarea id="shipping-details" placeholder="Instructions, remarques..."></textarea></div>
         </div>
+
         <button id="submit-order-btn">Commander ☕</button>
       </div>
     </div>
 
     <!-- INFOS -->
     <div id="infos-page">
-
-      <!-- CARTE BIENVENUE -->
       <div class="info-card" style="margin-top:8px;background:linear-gradient(135deg,rgba(64,38,18,0.98),rgba(44,26,14,0.99));border-color:rgba(204,0,0,0.5);">
         <div style="text-align:center;margin-bottom:18px;">
           <div style="font-family:'Bangers',cursive;font-size:1.5rem;letter-spacing:3px;color:var(--gold-light);text-shadow:2px 2px 0 var(--wood-dark),0 0 20px rgba(200,146,42,0.6);line-height:1.3;">☕ BIENVENUE CHEZ<br>COFFEE NORD ☕</div>
         </div>
-        <div style="color:var(--cream);font-size:0.92rem;font-weight:900;line-height:1;text-align:center;letter-spacing:1px;margin-bottom:16px;">
-          SALUT À TOUS 👋
-        </div>
+        <div style="color:var(--cream);font-size:0.92rem;font-weight:900;line-height:1;text-align:center;letter-spacing:1px;margin-bottom:16px;">SALUT À TOUS 👋</div>
         <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
           <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(200,146,42,0.15);border-radius:8px;padding:12px 14px;">
             <span style="font-size:1.2rem;flex-shrink:0">🚚</span>
@@ -523,8 +570,6 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
           <div style="color:var(--cream-dim);font-size:0.85rem;font-weight:700;margin-top:4px;">MERCI À VOUS 🙏</div>
         </div>
       </div>
-
-      <!-- CARTE LIVRAISON -->
       <div class="info-card">
         <div class="info-card-header"><div class="info-card-icon">🚚</div><div class="info-card-title">Livraison</div></div>
         <div style="color:var(--cream-dim);font-size:0.88rem;line-height:1.8;margin-bottom:14px;">
@@ -543,8 +588,6 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
         </div>
         <div style="background:rgba(200,146,42,0.06);border:1px solid rgba(200,146,42,0.2);border-radius:8px;padding:10px 14px;font-size:0.83rem;color:var(--gold);font-weight:800;text-align:center">💶 Paiement en espèces uniquement</div>
       </div>
-
-      <!-- CARTE ENVOI POSTAL -->
       <div class="info-card">
         <div class="info-card-header"><div class="info-card-icon">📦</div><div class="info-card-title">Envoi postal</div></div>
         <div style="color:var(--cream-dim);font-size:0.88rem;line-height:1.8;margin-bottom:12px">Commandez depuis n'importe où, on envoie partout ! 🌟✅<br><span style="color:var(--gold-light);font-weight:800;">3X SOUS VIDE · RELAIS SÉCURISÉ ✈️</span></div>
@@ -558,8 +601,6 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
         </div>
         <div style="background:rgba(200,146,42,0.06);border:1px solid rgba(200,146,42,0.2);border-radius:8px;padding:10px 14px;font-size:0.83rem;color:var(--gold);font-weight:800;text-align:center">📦 Envoi sécurisé & discret</div>
       </div>
-
-      <!-- CARTE MEET-UP (inchangée) -->
       <div class="info-card">
         <div class="info-card-header"><div class="info-card-icon">📍</div><div class="info-card-title">Meet-up</div></div>
         <div style="color:var(--cream-dim);font-size:0.88rem;line-height:1.8;margin-bottom:12px">Vous pouvez passer directement sur place la famille !<br>Avant de venir, contactez-nous en privé et précisez :</div>
@@ -575,39 +616,38 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
         <div class="meetup-horaires-row"><span style="color:var(--green-plant)">✅</span><span class="meetup-horaires-text">SAV disponible 24h/24</span></div>
         <div style="margin-top:10px;background:rgba(200,146,42,0.06);border:1px solid rgba(200,146,42,0.2);border-radius:8px;padding:10px 14px;font-size:0.83rem;color:var(--gold);font-weight:800;text-align:center">💶 Paiement en espèces uniquement</div>
       </div>
-
     </div>
+
     <!-- RÉSEAUX -->
-<div id="reseaux-page">
-  <h2 class="section-title">🔥 Nos réseaux</h2>
-  <div class="reseaux-list">
-    <div class="reseau-item" data-link="https://tatokdym.org/joinchat/wLbrYOFiFfU2kYkvnMkWow">
-      <div class="reseau-icon-wrap" style="background:rgba(200,146,42,0.1);border-color:rgba(200,146,42,0.3)">🥔</div>
-      <div class="reseau-text"><div class="reseau-name">Potato</div><div class="reseau-sub">Canal officiel 📢</div></div>
-      <div class="reseau-arrow">›</div>
-    </div>
-    <div class="reseau-item" data-link="https://t.me/Scff59">
-      <div class="reseau-icon-wrap" style="background:rgba(41,182,246,0.12);border-color:rgba(41,182,246,0.3)">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/512px-Telegram_logo.svg.png" alt="Telegram">
+    <div id="reseaux-page">
+      <h2 class="section-title">🔥 Nos réseaux</h2>
+      <div class="reseaux-list">
+        <div class="reseau-item" data-link="https://tatokdym.org/joinchat/wLbrYOFiFfU2kYkvnMkWow">
+          <div class="reseau-icon-wrap" style="background:rgba(200,146,42,0.1);border-color:rgba(200,146,42,0.3)">🥔</div>
+          <div class="reseau-text"><div class="reseau-name">Potato</div><div class="reseau-sub">Canal officiel 📢</div></div>
+          <div class="reseau-arrow">›</div>
+        </div>
+        <div class="reseau-item" data-link="https://t.me/Scff59">
+          <div class="reseau-icon-wrap" style="background:rgba(41,182,246,0.12);border-color:rgba(41,182,246,0.3)">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/512px-Telegram_logo.svg.png" alt="Telegram">
+          </div>
+          <div class="reseau-text"><div class="reseau-name">Contact Telegram</div><div class="reseau-sub">@Scff59 💬</div></div>
+          <div class="reseau-arrow">›</div>
+        </div>
+        <div class="reseau-item" data-link="https://t.me/+PnTM9tZvDY85YzUO">
+          <div class="reseau-icon-wrap" style="background:rgba(41,182,246,0.12);border-color:rgba(41,182,246,0.3)">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/512px-Telegram_logo.svg.png" alt="Telegram">
+          </div>
+          <div class="reseau-text"><div class="reseau-name">Canal Telegram</div><div class="reseau-sub">Annonces & updates 📢</div></div>
+          <div class="reseau-arrow">›</div>
+        </div>
+        <div class="reseau-item" data-link="https://signal.me/#eu/yiCG24dZc8WNOXJFsV77aOQT8lcv1zfiihQdWwsSz02vTApDMZxCbZCRyNq0İXGX">
+          <div class="reseau-icon-wrap" style="background:rgba(37,211,102,0.12);border-color:rgba(37,211,102,0.3)">📱</div>
+          <div class="reseau-text"><div class="reseau-name">Contact Signal</div><div class="reseau-sub">Lien direct 🔒</div></div>
+          <div class="reseau-arrow">›</div>
+        </div>
       </div>
-      <div class="reseau-text"><div class="reseau-name">Contact Telegram</div><div class="reseau-sub">@Scff59 💬</div></div>
-      <div class="reseau-arrow">›</div>
     </div>
-    <div class="reseau-item" data-link="https://t.me/+PnTM9tZvDY85YzUO">
-      <div class="reseau-icon-wrap" style="background:rgba(41,182,246,0.12);border-color:rgba(41,182,246,0.3)">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/512px-Telegram_logo.svg.png" alt="Telegram">
-      </div>
-      <div class="reseau-text"><div class="reseau-name">Canal Telegram</div><div class="reseau-sub">Annonces & updates 📢</div></div>
-      <div class="reseau-arrow">›</div>
-    </div>
-    <div class="reseau-item" data-link="https://signal.me/#eu/yiCG24dZc8WNOXJFsV77aOQT8lcv1zfiihQdWwsSz02vTApDMZxCbZCRyNq0İXGX">
-      <div class="reseau-icon-wrap" style="background:rgba(37,211,102,0.12);border-color:rgba(37,211,102,0.3)">📱</div>
-      <div class="reseau-text"><div class="reseau-name">Contact Signal</div><div class="reseau-sub">Lien direct 🔒</div></div>
-      <div class="reseau-arrow">›</div>
-    </div>
-  </div>
-</div>
-
 
     <!-- AVIS -->
     <div id="avis-page" style="display:none;padding:16px 14px 110px">
@@ -759,7 +799,10 @@ function openProductDetail(key){
   document.getElementById('detail-strain-desc').innerHTML=content||'';
   const qtyGrid=document.getElementById('qty-grid');qtyGrid.innerHTML='';
   p.quantities.forEach((item,idx)=>{
-    const btn=document.createElement('button');btn.className='qty-btn';btn.innerHTML=`${item.qty}<br><span class="price-new">${item.price}</span>`;btn.dataset.idx=idx;
+    const typeLabel=item.type==='livraison'?'🚚 Livraison':'📍 Sur place';
+    const btn=document.createElement('button');btn.className='qty-btn';
+    btn.innerHTML=`${item.qty}<br><span class="price-new">${item.price}</span><br><span style="font-size:0.65rem;opacity:0.75;font-weight:700">${typeLabel}</span>`;
+    btn.dataset.idx=idx;
     if(p.restock){btn.disabled=true;btn.style.opacity='0.3';btn.style.cursor='not-allowed';}
     else btn.onclick=()=>{qtyGrid.querySelectorAll('.qty-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');};
     qtyGrid.appendChild(btn);
@@ -774,7 +817,8 @@ function openProductDetail(key){
 document.getElementById('add-to-cart-btn').onclick=()=>{
   const sel=document.querySelector('.qty-btn.selected');if(!sel){alert('Sélectionnez une quantité !');return;}
   const title=document.getElementById('detail-title').textContent;const key=Object.keys(products).find(k=>products[k].title===title);
-  const item=products[key].quantities[parseInt(sel.dataset.idx)];cart.push({title,qty:item.qty,price:item.price});saveCart();alert('✅ Ajouté au panier !');
+  const item=products[key].quantities[parseInt(sel.dataset.idx)];
+  cart.push({title,qty:item.qty,price:item.price,type:item.type||'sur_place'});saveCart();alert('✅ Ajouté au panier !');
 };
 
 document.getElementById('nav-home').onclick=goToHome;
@@ -808,28 +852,42 @@ function renderCart(){
   const container=document.getElementById('cart-items');container.innerHTML='';
   if(!cart.length){container.innerHTML='<p style="text-align:center;color:var(--wood-light);padding:40px 0;font-weight:700">Votre panier est vide</p>';document.getElementById('cart-total').textContent='';return;}
   let total=0;
-  cart.forEach((item,index)=>{total+=parseInt(item.price)||0;const div=document.createElement('div');div.className='cart-item';div.innerHTML=`<div><div class="cart-item-title">${item.title}</div><div class="cart-item-qty">${item.qty} — ${item.price}</div></div><button class="delete-btn" data-index="${index}">×</button>`;container.appendChild(div);});
+  cart.forEach((item,index)=>{
+    total+=parseInt(item.price)||0;
+    const typeLabel=item.type==='livraison'?'🚚 Livraison':'📍 Sur place';
+    const typeClass=item.type==='livraison'?'livraison':'sur-place';
+    const div=document.createElement('div');div.className='cart-item';
+    div.innerHTML=`<div><div class="cart-item-title">${item.title}</div><div class="cart-item-qty">${item.qty} — ${item.price} <span class="qty-type-badge ${typeClass}">${typeLabel}</span></div></div><button class="delete-btn" data-index="${index}">×</button>`;
+    container.appendChild(div);
+  });
   document.getElementById('cart-total').innerHTML=`Total : <strong>${total} €</strong>`;
 }
 document.getElementById('cart-page').addEventListener('click',e=>{if(e.target.classList.contains('delete-btn')){cart.splice(parseInt(e.target.dataset.index),1);saveCart();renderCart();}});
 document.querySelectorAll('.option-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{if(btn.closest('.questionnaire')){document.querySelectorAll('.questionnaire .option-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('pickup-questions').style.display=btn.dataset.type==='pickup'?'block':'none';document.getElementById('delivery-questions').style.display=btn.dataset.type==='delivery'?'block':'none';document.getElementById('shipping-questions').style.display=btn.dataset.type==='shipping'?'block':'none';}});
 });
+
 document.getElementById('submit-order-btn').onclick=()=>{
   if(!cart.length){alert('Votre panier est vide');return;}
   const modeBtn=document.querySelector('.questionnaire .option-btn.active');if(!modeBtn){alert('Veuillez choisir un mode de récupération.');return;}
-  let modeLabel='';if(modeBtn.dataset.type==='pickup')modeLabel='Venir sur place';else if(modeBtn.dataset.type==='delivery')modeLabel='Livraison';else modeLabel='Envoi postal 📦';
+  let modeLabel='';if(modeBtn.dataset.type==='pickup')modeLabel='Venir sur place 📍';else if(modeBtn.dataset.type==='delivery')modeLabel='Livraison 🚚';else modeLabel='Envoi postal 📦🌟✅';
   const senderName=tgUser?.username?'@'+tgUser.username:(tgUser?.first_name||'Utilisateur');
   let message=`☕ *NOUVELLE COMMANDE — Coffee Nord* ☕\n\n👤 ${senderName}\n📅 ${new Date().toLocaleString('fr-FR')}\n\n🛍️ *Articles :*\n`;
   let total=0;let itemsText='';
-  cart.forEach(item=>{total+=parseInt(item.price)||0;message+=`• ${item.title} — ${item.qty} (${item.price})\n`;itemsText+=`• ${item.title} ${item.qty} (${item.price})\n`;});
+  cart.forEach(item=>{
+    total+=parseInt(item.price)||0;
+    const typeLabel=item.type==='livraison'?'[Livraison]':'[Sur place]';
+    message+=`• ${item.title} — ${item.qty} (${item.price}) ${typeLabel}\n`;
+    itemsText+=`• ${item.title} ${item.qty} (${item.price}) ${typeLabel}\n`;
+  });
   message+=`\n💰 *Total : ${total} €*\n\n📦 *Mode :* ${modeLabel}\n`;
   if(modeBtn.dataset.type==='pickup'){const time=document.getElementById('pickup-time').value;if(time)message+=`\n🕐 Heure meet-up : ${time}`;}
   else if(modeBtn.dataset.type==='delivery'){const time=document.getElementById('delivery-time').value;const address=document.getElementById('delivery-address').value.trim();const details=document.getElementById('delivery-details').value.trim();if(time)message+=`\n🕐 Heure livraison : ${time}`;if(address)message+=`\n📍 Adresse : ${address}`;if(details)message+=`\n📝 Détails : ${details}`;}
   else if(modeBtn.dataset.type==='shipping'){const address=document.getElementById('shipping-address').value.trim();const details=document.getElementById('shipping-details').value.trim();message+=`\n💳 Paiement : Crypto (ETH/BTC) en PV`;if(address)message+=`\n📮 Adresse postale : ${address}`;if(details)message+=`\n📝 Précisions : ${details}`;}
   message+=`\n\nMerci ! 🙏`;
   commandes.push({tgName:tgUser?.first_name||'Invité',items:itemsText.trim(),total,mode:modeLabel,date:new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'})});saveCommandes();
-  const url=`https://t.me/DINO76S?text=${encodeURIComponent(message)}`;if(tg)tg.openTelegramLink(url);else window.open(url,'_blank');
+  /* ✅ CONTACT MIS À JOUR → @Scff59 */
+  const url=`https://t.me/Scff59?text=${encodeURIComponent(message)}`;if(tg)tg.openTelegramLink(url);else window.open(url,'_blank');
 };
 
 function renderProfilPage(){
@@ -869,18 +927,28 @@ let adminRestockValue=false;
 function openAdminForm(key){
   const formSection=document.getElementById('admin-form-section');formSection.style.display='block';formSection.scrollIntoView({behavior:'smooth'});document.getElementById('admin-edit-key').value=key||'';
   if(key){document.getElementById('admin-form-title').textContent='✏️ Modifier le produit';const p=getAllProducts()[key];document.getElementById('af-title').value=p.title||'';document.getElementById('af-category').value=p.category||'';document.getElementById('af-farm').value=p.farm||'';document.getElementById('af-video').value=p.video||'';document.getElementById('af-strain').value=p.strain||'';document.getElementById('af-description').value=p.description||'';adminRestockValue=!!p.restock;renderQtyRows(p.quantities||[]);}
-  else{document.getElementById('admin-form-title').textContent='➕ Nouveau produit';['af-title','af-category','af-farm','af-video','af-strain','af-description'].forEach(id=>{document.getElementById(id).value='';});adminRestockValue=false;renderQtyRows([{qty:'',price:''}]);}
+  else{document.getElementById('admin-form-title').textContent='➕ Nouveau produit';['af-title','af-category','af-farm','af-video','af-strain','af-description'].forEach(id=>{document.getElementById(id).value='';});adminRestockValue=false;renderQtyRows([{qty:'',price:'',type:'sur_place'}]);}
   updateRestockButtons();
 }
 function closeAdminForm(){document.getElementById('admin-form-section').style.display='none';}
 function setRestockAdmin(val){adminRestockValue=val;updateRestockButtons();}
 function updateRestockButtons(){document.getElementById('restock-no').classList.toggle('active',!adminRestockValue);document.getElementById('restock-yes').classList.toggle('active',adminRestockValue);}
 window.setRestockAdmin=setRestockAdmin;
-function renderQtyRows(quantities){const cont=document.getElementById('qty-rows');cont.innerHTML='';quantities.forEach((q,i)=>{addQtyRowFilled(q.qty,q.price,i);});}
-function addQtyRowFilled(qtyVal,priceVal,idx){const cont=document.getElementById('qty-rows');const row=document.createElement('div');row.className='admin-qty-row';row.dataset.idx=idx||cont.children.length;row.innerHTML=`<input class="admin-input" placeholder="Quantité" value="${qtyVal||''}" style="font-size:0.88rem;padding:9px 10px;"><input class="admin-input" placeholder="Prix (ex: 70 €)" value="${priceVal||''}" style="font-size:0.88rem;padding:9px 10px;"><button class="admin-qty-del" onclick="this.parentElement.remove()">×</button>`;cont.appendChild(row);}
-function addQtyRow(){addQtyRowFilled('','',document.getElementById('qty-rows').children.length);}
+function renderQtyRows(quantities){const cont=document.getElementById('qty-rows');cont.innerHTML='';quantities.forEach((q,i)=>{addQtyRowFilled(q.qty,q.price,q.type||'sur_place',i);});}
+function addQtyRowFilled(qtyVal,priceVal,typeVal,idx){
+  const cont=document.getElementById('qty-rows');const row=document.createElement('div');row.className='admin-qty-row';row.dataset.idx=idx||cont.children.length;
+  const typeSelected_sp=(!typeVal||typeVal==='sur_place')?'selected':'';
+  const typeSelected_li=(typeVal==='livraison')?'selected':'';
+  row.innerHTML=`<input class="admin-input" placeholder="Qté" value="${qtyVal||''}" style="font-size:0.88rem;padding:9px 10px;"><input class="admin-input" placeholder="Prix (ex: 70€)" value="${priceVal||''}" style="font-size:0.88rem;padding:9px 10px;"><select class="admin-qty-type"><option value="sur_place" ${typeSelected_sp}>📍 Sur place</option><option value="livraison" ${typeSelected_li}>🚚 Livraison</option></select><button class="admin-qty-del" onclick="this.parentElement.remove()">×</button>`;
+  cont.appendChild(row);
+}
+function addQtyRow(){addQtyRowFilled('','','sur_place',document.getElementById('qty-rows').children.length);}
 window.addQtyRow=addQtyRow;
-function getQtyRows(){const rows=document.querySelectorAll('#qty-rows .admin-qty-row');const result=[];rows.forEach(row=>{const inputs=row.querySelectorAll('input');const qty=inputs[0].value.trim();const price=inputs[1].value.trim();if(qty&&price)result.push({qty,price});});return result;}
+function getQtyRows(){
+  const rows=document.querySelectorAll('#qty-rows .admin-qty-row');const result=[];
+  rows.forEach(row=>{const inputs=row.querySelectorAll('input');const sel=row.querySelector('select');const qty=inputs[0].value.trim();const price=inputs[1].value.trim();const type=sel?sel.value:'sur_place';if(qty&&price)result.push({qty,price,type});});
+  return result;
+}
 function saveAdminProduct(){
   const key=document.getElementById('admin-edit-key').value;const title=document.getElementById('af-title').value.trim();const category=document.getElementById('af-category').value.trim();const farm=document.getElementById('af-farm').value.trim();const video=document.getElementById('af-video').value.trim();const strain=document.getElementById('af-strain').value.trim();const description=document.getElementById('af-description').value.trim();const quantities=getQtyRows();
   if(!title||!category||!farm){alert('⚠️ Titre, catégorie et farm sont obligatoires !');return;}if(!quantities.length){alert('⚠️ Ajoutez au moins une quantité !');return;}
