@@ -7,7 +7,7 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, orderBy, query, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     const firebaseConfig = {
       apiKey: "AIzaSyDu_UUar4GTsLJCTvJmzIVFUySumGfGdMQ",
       authDomain: "coffeenord-3bb70.firebaseapp.com",
@@ -25,6 +25,39 @@
     window._fsGet = getDocs;
     window._fsQ = query;
     window._fsOrder = orderBy;
+    window._fsDoc = doc;
+    window._fsSetDoc = setDoc;
+    window._fsGetDoc = getDoc;
+
+    // ═══ PRODUITS FIRESTORE ═══
+    window.saveProductsToFirestore = async function(customObj, deletedArr, overridesObj) {
+      try {
+        const ref = window._fsDoc(window._db, 'admin_config', 'products');
+        await window._fsSetDoc(ref, {
+          custom: JSON.stringify(customObj),
+          deleted: JSON.stringify(deletedArr),
+          overrides: JSON.stringify(overridesObj),
+          updatedAt: Date.now()
+        });
+      } catch(e) { console.error('Firestore save error', e); }
+    };
+
+    window.loadProductsFromFirestore = async function() {
+      try {
+        const ref = window._fsDoc(window._db, 'admin_config', 'products');
+        const snap = await window._fsGetDoc(ref);
+        if (snap.exists()) {
+          const data = snap.data();
+          return {
+            custom: JSON.parse(data.custom || '{}'),
+            deleted: JSON.parse(data.deleted || '[]'),
+            overrides: JSON.parse(data.overrides || '{}')
+          };
+        }
+      } catch(e) { console.error('Firestore load error', e); }
+      return { custom: {}, deleted: [], overrides: {} };
+    };
+
     document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => { if(window.loadAvisFromFirestore) window.loadAvisFromFirestore(); }, 300);
     });
@@ -167,7 +200,6 @@ body::after{
 input[type="time"],input[type="text"],textarea{width:100%;padding:12px;border-radius:8px;border:1.5px solid rgba(200,146,42,0.25);background:rgba(20,10,4,0.8);color:var(--cream);font-size:0.9rem;font-family:'Nunito',sans-serif;outline:none;}
 input:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 8px rgba(200,146,42,0.2);}
 textarea{min-height:80px;resize:vertical;}
-/* Info livraison banner */
 .delivery-info-banner{background:linear-gradient(135deg,rgba(200,146,42,0.10),rgba(204,0,0,0.07));border:1.5px solid rgba(200,146,42,0.4);border-radius:10px;padding:14px 16px;margin-bottom:14px;position:relative;overflow:hidden;}
 .delivery-info-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0.7;}
 .delivery-info-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
@@ -183,8 +215,6 @@ textarea{min-height:80px;resize:vertical;}
 .info-card-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
 .info-card-icon{width:44px;height:44px;background:rgba(204,0,0,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;border:1.5px solid rgba(204,0,0,0.25);}
 .info-card-title{font-family:'Bangers',cursive;font-size:1.2rem;font-weight:400;color:var(--cream);letter-spacing:2px;}
-.dept-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
-.dept-badge{background:rgba(204,0,0,0.1);border:1.5px solid rgba(204,0,0,0.4);color:var(--red-light);padding:5px 14px;border-radius:4px;font-family:'Bangers',cursive;font-size:1rem;font-weight:400;letter-spacing:1px;}
 .meetup-location-row{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.02);border-radius:8px;padding:12px 14px;margin-bottom:8px;border:1px solid rgba(200,146,42,0.12);}
 .meetup-location-name{font-size:0.95rem;font-weight:800;color:var(--cream);}
 .disponible-badge{background:rgba(74,124,63,0.12);border:1.5px solid rgba(107,160,90,0.4);color:var(--green-light);font-size:0.7rem;font-weight:800;padding:5px 12px;border-radius:4px;letter-spacing:0.5px;}
@@ -293,7 +323,6 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
 .admin-add-btn{width:100%;padding:14px;background:linear-gradient(135deg,rgba(204,0,0,0.12),rgba(200,146,42,0.08));border:2px dashed rgba(200,146,42,0.4);color:var(--gold);border-radius:12px;font-family:'Bangers',cursive;font-size:1.1rem;letter-spacing:2px;cursor:pointer;margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:10px;}
 .admin-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--wood-plank);border:1.5px solid rgba(200,146,42,0.5);color:var(--gold-light);padding:12px 24px;border-radius:10px;font-family:'Bangers',cursive;font-size:1rem;letter-spacing:2px;z-index:999999;white-space:nowrap;opacity:0;transition:opacity 0.3s;pointer-events:none;box-shadow:0 4px 24px rgba(0,0,0,0.8),0 0 16px rgba(200,146,42,0.2);}
 .admin-toast.show{opacity:1;}
-/* Badge type sur chaque ligne de quantité dans le panier */
 .qty-type-badge{display:inline-block;font-size:0.65rem;font-weight:800;padding:2px 7px;border-radius:4px;margin-left:6px;vertical-align:middle;}
 .qty-type-badge.sur-place{background:rgba(200,146,42,0.12);border:1px solid rgba(200,146,42,0.4);color:var(--gold-light);}
 .qty-type-badge.livraison{background:rgba(41,182,246,0.1);border:1px solid rgba(41,182,246,0.35);color:#29b6f6;}
@@ -301,7 +330,6 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
 </head>
 <body>
 
-<!-- SPLASH -->
 <div id="splash-screen" class="splash">
   <div class="splash-content">
     <div class="splash-bg"></div>
@@ -317,7 +345,6 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
   </div>
 </div>
 
-<!-- ADMIN LOGIN -->
 <div id="admin-login">
   <div class="admin-login-box">
     <div class="admin-login-icon">🔐</div>
@@ -348,7 +375,6 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
   </div>
 </div>
 
-<!-- ADMIN PANEL -->
 <div id="admin-overlay">
   <div class="admin-header">
     <div class="admin-title">🔧 ADMIN PANEL</div>
@@ -415,13 +441,10 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="admin-toast" id="admin-toast"></div>
 
 <div class="container">
   <div class="content">
-
-    <!-- ACCUEIL -->
     <div id="home-page">
       <div id="home-hero">
         <div class="hero-logo-ring" id="admin-trigger">
@@ -452,7 +475,6 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
       <div id="products-grid"></div>
     </div>
 
-    <!-- DÉTAIL PRODUIT -->
     <div id="product-detail">
       <div class="swiper-wrap">
         <div class="swiper-track" id="swiper-track"></div>
@@ -472,7 +494,6 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
       </div>
     </div>
 
-    <!-- PANIER -->
     <div id="cart-page">
       <h2 style="color:var(--gold);text-align:center;margin:18px 0;font-family:'Bangers',cursive;font-size:2rem;letter-spacing:3px;text-shadow:2px 2px 0 var(--wood-dark),0 0 16px rgba(200,146,42,0.5);">Votre Panier 🛒</h2>
       <div id="cart-items"></div>
@@ -484,44 +505,22 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
           <button class="option-btn" data-type="delivery">🚚 Livraison</button>
           <button class="option-btn" data-type="shipping">📦 Envoi postal 🌟✅</button>
         </div>
-
-        <!-- SUR PLACE -->
         <div id="pickup-questions" style="display:none">
           <div class="question"><span class="question-label">Pour quelle heure ?</span><input type="time" id="pickup-time"></div>
         </div>
-
-        <!-- LIVRAISON -->
         <div id="delivery-questions" style="display:none">
-          <!-- Bannière info livraison -->
           <div class="delivery-info-banner">
             <div class="delivery-info-title">📋 INFOS LIVRAISON</div>
-            <div class="delivery-info-row">
-              <span>📍</span>
-              <span>Zones couvertes : <strong style="color:var(--red-light)">59 · 62 · 02 · 🇧🇪 BE</strong></span>
-            </div>
-            <div class="delivery-info-row">
-              <span>🕐</span>
-              <span>Horaires de livraison : <strong style="color:var(--gold-light)">12h – 23h</strong></span>
-            </div>
-            <div class="delivery-info-row">
-              <span>💶</span>
-              <span>Paiement en <strong style="color:var(--gold-light)">espèces uniquement</strong></span>
-            </div>
-            <div class="delivery-info-row">
-              <span>📞</span>
-              <span>Confirmez votre commande en PV sur <strong style="color:#29b6f6">@Scff59</strong> avant la livraison</span>
-            </div>
-            <div class="delivery-info-row">
-              <span>⚡</span>
-              <span style="color:var(--green-light)">Livraison rapide & discrète 🔐</span>
-            </div>
+            <div class="delivery-info-row"><span>📍</span><span>Zones couvertes : <strong style="color:var(--red-light)">59 · 62 · 02 · 🇧🇪 BE</strong></span></div>
+            <div class="delivery-info-row"><span>🕐</span><span>Horaires de livraison : <strong style="color:var(--gold-light)">12h – 23h</strong></span></div>
+            <div class="delivery-info-row"><span>💶</span><span>Paiement en <strong style="color:var(--gold-light)">espèces uniquement</strong></span></div>
+            <div class="delivery-info-row"><span>📞</span><span>Confirmez votre commande en PV sur <strong style="color:#29b6f6">@Scff59</strong> avant la livraison</span></div>
+            <div class="delivery-info-row"><span>⚡</span><span style="color:var(--green-light)">Livraison rapide & discrète 🔐</span></div>
           </div>
           <div class="question"><span class="question-label">Heure souhaitée</span><input type="time" id="delivery-time"></div>
           <div class="question"><span class="question-label">Adresse complète</span><input type="text" id="delivery-address" placeholder="Rue, numéro, ville..."></div>
           <div class="question"><span class="question-label">Précisions (étage, code, etc.)</span><textarea id="delivery-details" placeholder="Interphone, digicode, remarques..."></textarea></div>
         </div>
-
-        <!-- ENVOI POSTAL -->
         <div id="shipping-questions" style="display:none">
           <div class="crypto-block">
             <div class="crypto-title">💳 PAIEMENT EN CRYPTO EN PV ✍️</div>
@@ -534,41 +533,21 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
           <div class="question"><span class="question-label">Adresse postale complète</span><input type="text" id="shipping-address" placeholder="Nom, Rue, Code postal, Ville..."></div>
           <div class="question"><span class="question-label">Précisions supplémentaires</span><textarea id="shipping-details" placeholder="Instructions, remarques..."></textarea></div>
         </div>
-
         <button id="submit-order-btn">Commander ☕</button>
       </div>
     </div>
 
-    <!-- INFOS -->
     <div id="infos-page">
       <div class="info-card" style="margin-top:8px;background:linear-gradient(135deg,rgba(64,38,18,0.98),rgba(44,26,14,0.99));border-color:rgba(204,0,0,0.5);">
-        <div style="text-align:center;margin-bottom:18px;">
-          <div style="font-family:'Bangers',cursive;font-size:1.5rem;letter-spacing:3px;color:var(--gold-light);text-shadow:2px 2px 0 var(--wood-dark),0 0 20px rgba(200,146,42,0.6);line-height:1.3;">☕ BIENVENUE CHEZ<br>COFFEE NORD ☕</div>
-        </div>
+        <div style="text-align:center;margin-bottom:18px;"><div style="font-family:'Bangers',cursive;font-size:1.5rem;letter-spacing:3px;color:var(--gold-light);text-shadow:2px 2px 0 var(--wood-dark),0 0 20px rgba(200,146,42,0.6);line-height:1.3;">☕ BIENVENUE CHEZ<br>COFFEE NORD ☕</div></div>
         <div style="color:var(--cream);font-size:0.92rem;font-weight:900;line-height:1;text-align:center;letter-spacing:1px;margin-bottom:16px;">SALUT À TOUS 👋</div>
         <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
-          <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(200,146,42,0.15);border-radius:8px;padding:12px 14px;">
-            <span style="font-size:1.2rem;flex-shrink:0">🚚</span>
-            <div style="color:var(--cream);font-size:0.88rem;font-weight:800;line-height:1.6;">NOUS PROPOSONS UN SERVICE DE LIVRAISON<br><span style="color:var(--gold-light);">DE PRODUITS VENANT TOUT DROIT DE LA SOURCE 🇳🇱🇺🇸🇲🇦</span></div>
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(200,146,42,0.15);border-radius:8px;padding:12px 14px;">
-            <span style="font-size:1.2rem;flex-shrink:0">📦</span>
-            <div style="color:var(--cream);font-size:0.88rem;font-weight:800;line-height:1.6;">ENVOIS MONDIALE RELAIS<br><span style="color:var(--gold-light);">TRÈS SÉCURISÉ · MIS 3X SOUS VIDE ✈️</span></div>
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(204,0,0,0.25);border-radius:8px;padding:12px 14px;">
-            <span style="font-size:1.2rem;flex-shrink:0">📍</span>
-            <div style="color:var(--cream);font-size:0.88rem;font-weight:800;line-height:1.6;">MEET-UP À 5 MINUTES DE LILLE<br><span style="color:var(--cream-dim);font-weight:700;">ENDROIT DISCRET ET SÉCURISÉ 🔐<br>BOSSEUR PONCTUEL ET SÉRIEUX 🫡</span></div>
-          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(200,146,42,0.15);border-radius:8px;padding:12px 14px;"><span style="font-size:1.2rem;flex-shrink:0">🚚</span><div style="color:var(--cream);font-size:0.88rem;font-weight:800;line-height:1.6;">NOUS PROPOSONS UN SERVICE DE LIVRAISON<br><span style="color:var(--gold-light);">DE PRODUITS VENANT TOUT DROIT DE LA SOURCE 🇳🇱🇺🇸🇲🇦</span></div></div>
+          <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(200,146,42,0.15);border-radius:8px;padding:12px 14px;"><span style="font-size:1.2rem;flex-shrink:0">📦</span><div style="color:var(--cream);font-size:0.88rem;font-weight:800;line-height:1.6;">ENVOIS MONDIALE RELAIS<br><span style="color:var(--gold-light);">TRÈS SÉCURISÉ · MIS 3X SOUS VIDE ✈️</span></div></div>
+          <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(204,0,0,0.25);border-radius:8px;padding:12px 14px;"><span style="font-size:1.2rem;flex-shrink:0">📍</span><div style="color:var(--cream);font-size:0.88rem;font-weight:800;line-height:1.6;">MEET-UP À 5 MINUTES DE LILLE<br><span style="color:var(--cream-dim);font-weight:700;">ENDROIT DISCRET ET SÉCURISÉ 🔐<br>BOSSEUR PONCTUEL ET SÉRIEUX 🫡</span></div></div>
         </div>
-        <div style="background:linear-gradient(135deg,rgba(204,0,0,0.12),rgba(200,146,42,0.08));border:2px solid rgba(200,146,42,0.4);border-radius:10px;padding:14px 16px;margin-bottom:12px;text-align:center;">
-          <div style="font-family:'Bangers',cursive;font-size:1.1rem;letter-spacing:3px;color:var(--gold-light);margin-bottom:6px;">CHEZ COFFEE NORD 🇳🇱</div>
-          <div style="color:var(--cream);font-size:0.9rem;font-weight:800;line-height:1.8;">DES PRIX 🥇 ATTRACTIFS<br>ET DE LA QUALITÉ 🥇</div>
-        </div>
-        <div style="background:rgba(200,146,42,0.06);border:1px solid rgba(200,146,42,0.2);border-radius:8px;padding:12px 16px;text-align:center;">
-          <div style="font-family:'Bangers',cursive;font-size:1rem;letter-spacing:2px;color:var(--cream-dim);margin-bottom:4px;">NOTRE SEUL BUT 🧠</div>
-          <div style="color:var(--green-light);font-size:1rem;font-weight:900;">VOUS SATISFAIRE 🥳</div>
-          <div style="color:var(--cream-dim);font-size:0.85rem;font-weight:700;margin-top:4px;">MERCI À VOUS 🙏</div>
-        </div>
+        <div style="background:linear-gradient(135deg,rgba(204,0,0,0.12),rgba(200,146,42,0.08));border:2px solid rgba(200,146,42,0.4);border-radius:10px;padding:14px 16px;margin-bottom:12px;text-align:center;"><div style="font-family:'Bangers',cursive;font-size:1.1rem;letter-spacing:3px;color:var(--gold-light);margin-bottom:6px;">CHEZ COFFEE NORD 🇳🇱</div><div style="color:var(--cream);font-size:0.9rem;font-weight:800;line-height:1.8;">DES PRIX 🥇 ATTRACTIFS<br>ET DE LA QUALITÉ 🥇</div></div>
+        <div style="background:rgba(200,146,42,0.06);border:1px solid rgba(200,146,42,0.2);border-radius:8px;padding:12px 16px;text-align:center;"><div style="font-family:'Bangers',cursive;font-size:1rem;letter-spacing:2px;color:var(--cream-dim);margin-bottom:4px;">NOTRE SEUL BUT 🧠</div><div style="color:var(--green-light);font-size:1rem;font-weight:900;">VOUS SATISFAIRE 🥳</div><div style="color:var(--cream-dim);font-size:0.85rem;font-weight:700;margin-top:4px;">MERCI À VOUS 🙏</div></div>
       </div>
       <div class="info-card">
         <div class="info-card-header"><div class="info-card-icon">🚚</div><div class="info-card-title">Livraison</div></div>
@@ -580,11 +559,7 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
             <span style="background:rgba(204,0,0,0.1);border:1.5px solid rgba(204,0,0,0.4);color:var(--red-light);padding:6px 16px;border-radius:4px;font-family:'Bangers',cursive;font-size:1.1rem;letter-spacing:2px;">02</span>
             <span style="background:rgba(41,182,246,0.1);border:1.5px solid rgba(41,182,246,0.4);color:#29b6f6;padding:6px 16px;border-radius:4px;font-family:'Bangers',cursive;font-size:1.1rem;letter-spacing:2px;">🇧🇪 BE</span>
           </div>
-          <div style="display:flex;align-items:center;gap:8px;background:rgba(74,124,63,0.07);border:1px solid rgba(107,160,90,0.25);border-radius:8px;padding:10px 14px;">
-            <span style="font-size:1rem;">🏁</span>
-            <span style="color:var(--green-light);font-weight:800;font-size:0.88rem;">FRANCE & BELGIQUE 🇫🇷🇧🇪</span>
-            <span style="font-size:1rem;margin-left:auto;">🕐</span>
-          </div>
+          <div style="display:flex;align-items:center;gap:8px;background:rgba(74,124,63,0.07);border:1px solid rgba(107,160,90,0.25);border-radius:8px;padding:10px 14px;"><span style="font-size:1rem;">🏁</span><span style="color:var(--green-light);font-weight:800;font-size:0.88rem;">FRANCE & BELGIQUE 🇫🇷🇧🇪</span><span style="font-size:1rem;margin-left:auto;">🕐</span></div>
         </div>
         <div style="background:rgba(200,146,42,0.06);border:1px solid rgba(200,146,42,0.2);border-radius:8px;padding:10px 14px;font-size:0.83rem;color:var(--gold);font-weight:800;text-align:center">💶 Paiement en espèces uniquement</div>
       </div>
@@ -608,48 +583,23 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
           <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(200,146,42,0.12);border-radius:7px;padding:9px 12px"><span style="color:var(--gold)">→</span><span style="color:var(--cream);font-size:0.86rem">Votre heure d'arrivée</span></div>
           <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(200,146,42,0.12);border-radius:7px;padding:9px 12px"><span style="color:var(--gold)">→</span><span style="color:var(--cream);font-size:0.86rem">Votre commande souhaitée</span></div>
         </div>
-        <div class="meetup-location-row">
-          <div style="display:flex;align-items:center;gap:10px"><span style="color:var(--red)">📍</span><span class="meetup-location-name">Coffee Nord · 5 min de Lille</span></div>
-          <div class="disponible-badge">Disponible</div>
-        </div>
+        <div class="meetup-location-row"><div style="display:flex;align-items:center;gap:10px"><span style="color:var(--red)">📍</span><span class="meetup-location-name">Coffee Nord · 5 min de Lille</span></div><div class="disponible-badge">Disponible</div></div>
         <div class="meetup-horaires-row" style="margin-top:8px"><span style="color:var(--gold)">🕐</span><span class="meetup-horaires-text">Horaires : 12h – 23h</span></div>
         <div class="meetup-horaires-row"><span style="color:var(--green-plant)">✅</span><span class="meetup-horaires-text">SAV disponible 24h/24</span></div>
         <div style="margin-top:10px;background:rgba(200,146,42,0.06);border:1px solid rgba(200,146,42,0.2);border-radius:8px;padding:10px 14px;font-size:0.83rem;color:var(--gold);font-weight:800;text-align:center">💶 Paiement en espèces uniquement</div>
       </div>
     </div>
 
-    <!-- RÉSEAUX -->
     <div id="reseaux-page">
       <h2 class="section-title">🔥 Nos réseaux</h2>
       <div class="reseaux-list">
-        <div class="reseau-item" data-link="https://tatokdym.org/joinchat/wLbrYOFiFfU2kYkvnMkWow">
-          <div class="reseau-icon-wrap" style="background:rgba(200,146,42,0.1);border-color:rgba(200,146,42,0.3)">🥔</div>
-          <div class="reseau-text"><div class="reseau-name">Potato</div><div class="reseau-sub">Canal officiel 📢</div></div>
-          <div class="reseau-arrow">›</div>
-        </div>
-        <div class="reseau-item" data-link="https://t.me/Scff59">
-          <div class="reseau-icon-wrap" style="background:rgba(41,182,246,0.12);border-color:rgba(41,182,246,0.3)">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/512px-Telegram_logo.svg.png" alt="Telegram">
-          </div>
-          <div class="reseau-text"><div class="reseau-name">Contact Telegram</div><div class="reseau-sub">@Scff59 💬</div></div>
-          <div class="reseau-arrow">›</div>
-        </div>
-        <div class="reseau-item" data-link="https://t.me/+PnTM9tZvDY85YzUO">
-          <div class="reseau-icon-wrap" style="background:rgba(41,182,246,0.12);border-color:rgba(41,182,246,0.3)">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/512px-Telegram_logo.svg.png" alt="Telegram">
-          </div>
-          <div class="reseau-text"><div class="reseau-name">Canal Telegram</div><div class="reseau-sub">Annonces & updates 📢</div></div>
-          <div class="reseau-arrow">›</div>
-        </div>
-        <div class="reseau-item" data-link="https://signal.me/#eu/yiCG24dZc8WNOXJFsV77aOQT8lcv1zfiihQdWwsSz02vTApDMZxCbZCRyNq0İXGX">
-          <div class="reseau-icon-wrap" style="background:rgba(37,211,102,0.12);border-color:rgba(37,211,102,0.3)">📱</div>
-          <div class="reseau-text"><div class="reseau-name">Contact Signal</div><div class="reseau-sub">Lien direct 🔒</div></div>
-          <div class="reseau-arrow">›</div>
-        </div>
+        <div class="reseau-item" data-link="https://tatokdym.org/joinchat/wLbrYOFiFfU2kYkvnMkWow"><div class="reseau-icon-wrap" style="background:rgba(200,146,42,0.1);border-color:rgba(200,146,42,0.3)">🥔</div><div class="reseau-text"><div class="reseau-name">Potato</div><div class="reseau-sub">Canal officiel 📢</div></div><div class="reseau-arrow">›</div></div>
+        <div class="reseau-item" data-link="https://t.me/Scff59"><div class="reseau-icon-wrap" style="background:rgba(41,182,246,0.12);border-color:rgba(41,182,246,0.3)"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/512px-Telegram_logo.svg.png" alt="Telegram"></div><div class="reseau-text"><div class="reseau-name">Contact Telegram</div><div class="reseau-sub">@Scff59 💬</div></div><div class="reseau-arrow">›</div></div>
+        <div class="reseau-item" data-link="https://t.me/+PnTM9tZvDY85YzUO"><div class="reseau-icon-wrap" style="background:rgba(41,182,246,0.12);border-color:rgba(41,182,246,0.3)"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/512px-Telegram_logo.svg.png" alt="Telegram"></div><div class="reseau-text"><div class="reseau-name">Canal Telegram</div><div class="reseau-sub">Annonces & updates 📢</div></div><div class="reseau-arrow">›</div></div>
+        <div class="reseau-item" data-link="https://signal.me/#eu/yiCG24dZc8WNOXJFsV77aOQT8lcv1zfiihQdWwsSz02vTApDMZxCbZCRyNq0İXGX"><div class="reseau-icon-wrap" style="background:rgba(37,211,102,0.12);border-color:rgba(37,211,102,0.3)">📱</div><div class="reseau-text"><div class="reseau-name">Contact Signal</div><div class="reseau-sub">Lien direct 🔒</div></div><div class="reseau-arrow">›</div></div>
       </div>
     </div>
 
-    <!-- AVIS -->
     <div id="avis-page" style="display:none;padding:16px 14px 110px">
       <h2 class="section-title">⭐ Avis clients</h2>
       <div class="info-card" style="margin-bottom:18px">
@@ -669,10 +619,8 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
       <div id="avis-list"></div>
     </div>
 
-    <!-- PROFIL -->
     <div id="profil-page"></div>
 
-    <!-- NAV -->
     <nav>
       <div class="nav-item active" id="nav-home"><span class="nav-emoji">🏠</span></div>
       <div class="nav-item" id="nav-cart"><span class="nav-emoji">🛒</span><span id="cart-badge"></span></div>
@@ -699,19 +647,46 @@ if (tg) {
 
 const BASE_PRODUCTS = {};
 
-function loadCustomProducts(){try{return JSON.parse(localStorage.getItem('admin_products_coffeenord'))||{};}catch(e){return {};}}
-function saveCustomProducts(obj){try{localStorage.setItem('admin_products_coffeenord',JSON.stringify(obj));}catch(e){}}
-function loadDeletedBase(){try{return JSON.parse(localStorage.getItem('admin_deleted_base_coffeenord'))||[];}catch(e){return [];}}
-function saveDeletedBase(arr){try{localStorage.setItem('admin_deleted_base_coffeenord',JSON.stringify(arr));}catch(e){}}
-function loadOverrides(){try{return JSON.parse(localStorage.getItem('admin_overrides_coffeenord'))||{};}catch(e){return {};}}
-function saveOverrides(obj){try{localStorage.setItem('admin_overrides_coffeenord',JSON.stringify(obj));}catch(e){}}
+// ═══════════════════════════════════════════════════
+// STOCKAGE FIRESTORE — produits visibles partout
+// ═══════════════════════════════════════════════════
+let _fsCustom = {};
+let _fsDeleted = [];
+let _fsOverrides = {};
+let _fsLoaded = false;
+
+async function _loadFSData() {
+  if (window.loadProductsFromFirestore) {
+    const data = await window.loadProductsFromFirestore();
+    _fsCustom   = data.custom   || {};
+    _fsDeleted  = data.deleted  || [];
+    _fsOverrides= data.overrides|| {};
+  }
+  _fsLoaded = true;
+}
+
+async function _saveFSData() {
+  if (window.saveProductsToFirestore) {
+    await window.saveProductsToFirestore(_fsCustom, _fsDeleted, _fsOverrides);
+  }
+}
+
+function loadCustomProducts()  { return _fsCustom; }
+function loadDeletedBase()     { return _fsDeleted; }
+function loadOverrides()       { return _fsOverrides; }
+
+function saveCustomProducts(obj) { _fsCustom = obj; _saveFSData(); }
+function saveDeletedBase(arr)    { _fsDeleted = arr; _saveFSData(); }
+function saveOverrides(obj)      { _fsOverrides = obj; _saveFSData(); }
+// ═══════════════════════════════════════════════════
 
 function getAllProducts(){
-  const deleted=loadDeletedBase();const overrides=loadOverrides();const custom=loadCustomProducts();const result={};
-  Object.values(BASE_PRODUCTS).forEach(p=>{if(!deleted.includes(p.key)){result[p.key]=overrides[p.key]?{...p,...overrides[p.key]}:{...p};}});
-  Object.values(custom).forEach(p=>{result[p.key]={...p};});return result;
+  const result={};
+  Object.values(BASE_PRODUCTS).forEach(p=>{if(!_fsDeleted.includes(p.key)){result[p.key]=_fsOverrides[p.key]?{...p,..._fsOverrides[p.key]}:{...p};}});
+  Object.values(_fsCustom).forEach(p=>{result[p.key]={...p};});
+  return result;
 }
-let products=getAllProducts();
+let products = {};
 
 let cart=[];
 try{cart=JSON.parse(localStorage.getItem('cart_coffeenord'))||[];}catch(e){cart=[];}
@@ -886,7 +861,6 @@ document.getElementById('submit-order-btn').onclick=()=>{
   else if(modeBtn.dataset.type==='shipping'){const address=document.getElementById('shipping-address').value.trim();const details=document.getElementById('shipping-details').value.trim();message+=`\n💳 Paiement : Crypto (ETH/BTC) en PV`;if(address)message+=`\n📮 Adresse postale : ${address}`;if(details)message+=`\n📝 Précisions : ${details}`;}
   message+=`\n\nMerci ! 🙏`;
   commandes.push({tgName:tgUser?.first_name||'Invité',items:itemsText.trim(),total,mode:modeLabel,date:new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'})});saveCommandes();
-  /* ✅ CONTACT MIS À JOUR → @Scff59 */
   const url=`https://t.me/Scff59?text=${encodeURIComponent(message)}`;if(tg)tg.openTelegramLink(url);else window.open(url,'_blank');
 };
 
@@ -921,8 +895,18 @@ function renderAdminProductsList(){
   if(!Object.keys(all).length){list.innerHTML='<p style="color:var(--wood-light);text-align:center;padding:20px;font-weight:700">Aucun produit.</p>';return;}
   Object.values(all).forEach(p=>{const isBase=!!BASE_PRODUCTS[p.key];const div=document.createElement('div');div.className='admin-product-card';div.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px"><div><div class="admin-product-name">${p.title}</div><div class="admin-product-farm">${p.farm} · ${p.category}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">${isBase?'<span style="font-size:0.65rem;color:var(--wood-light);font-weight:800;letter-spacing:1px">BASE</span>':'<span style="font-size:0.65rem;color:var(--gold);font-weight:800;letter-spacing:1px">CUSTOM</span>'}${p.restock?'<span class="admin-restock-on"><span class="restock-spin">⏳</span> RESTOCK</span>':''}</div></div><div class="admin-product-actions"><button class="btn-edit" onclick="openAdminForm('${p.key}')">✏️ Modifier</button><button class="btn-toggle-restock" onclick="toggleRestock('${p.key}')">${p.restock?'✅ Activer':'⏳ Restock'}</button><button class="btn-delete" onclick="deleteAdminProduct('${p.key}')">🗑️</button></div>`;list.appendChild(div);});
 }
-function toggleRestock(key){const all=getAllProducts();const p=all[key];const isBase=!!BASE_PRODUCTS[key];const isCustom=!!loadCustomProducts()[key];const newVal=!p.restock;if(isBase){const overrides=loadOverrides();overrides[key]={...(overrides[key]||{}),restock:newVal};saveOverrides(overrides);}else if(isCustom){const custom=loadCustomProducts();custom[key].restock=newVal;saveCustomProducts(custom);}refreshProductData();renderAdminProductsList();showAdminToast(newVal?'⏳ Restock activé':'✅ Produit disponible');}
-function deleteAdminProduct(key){const isBase=!!BASE_PRODUCTS[key];const isCustom=!!loadCustomProducts()[key];if(!confirm('Supprimer ce produit ?'))return;if(isBase){const deleted=loadDeletedBase();if(!deleted.includes(key))deleted.push(key);saveDeletedBase(deleted);const overrides=loadOverrides();delete overrides[key];saveOverrides(overrides);}else if(isCustom){const custom=loadCustomProducts();delete custom[key];saveCustomProducts(custom);}refreshProductData();renderAdminProductsList();showAdminToast('🗑️ Produit supprimé');}
+function toggleRestock(key){
+  const all=getAllProducts();const p=all[key];const isBase=!!BASE_PRODUCTS[key];const isCustom=!!_fsCustom[key];const newVal=!p.restock;
+  if(isBase){const overrides={..._fsOverrides};overrides[key]={...(overrides[key]||{}),restock:newVal};saveOverrides(overrides);}
+  else if(isCustom){const custom={..._fsCustom};custom[key].restock=newVal;saveCustomProducts(custom);}
+  refreshProductData();renderAdminProductsList();showAdminToast(newVal?'⏳ Restock activé':'✅ Produit disponible');
+}
+function deleteAdminProduct(key){
+  const isBase=!!BASE_PRODUCTS[key];const isCustom=!!_fsCustom[key];if(!confirm('Supprimer ce produit ?'))return;
+  if(isBase){const deleted=[..._fsDeleted];if(!deleted.includes(key))deleted.push(key);saveDeletedBase(deleted);const overrides={..._fsOverrides};delete overrides[key];saveOverrides(overrides);}
+  else if(isCustom){const custom={..._fsCustom};delete custom[key];saveCustomProducts(custom);}
+  refreshProductData();renderAdminProductsList();showAdminToast('🗑️ Produit supprimé');
+}
 let adminRestockValue=false;
 function openAdminForm(key){
   const formSection=document.getElementById('admin-form-section');formSection.style.display='block';formSection.scrollIntoView({behavior:'smooth'});document.getElementById('admin-edit-key').value=key||'';
@@ -952,17 +936,31 @@ function getQtyRows(){
 function saveAdminProduct(){
   const key=document.getElementById('admin-edit-key').value;const title=document.getElementById('af-title').value.trim();const category=document.getElementById('af-category').value.trim();const farm=document.getElementById('af-farm').value.trim();const video=document.getElementById('af-video').value.trim();const strain=document.getElementById('af-strain').value.trim();const description=document.getElementById('af-description').value.trim();const quantities=getQtyRows();
   if(!title||!category||!farm){alert('⚠️ Titre, catégorie et farm sont obligatoires !');return;}if(!quantities.length){alert('⚠️ Ajoutez au moins une quantité !');return;}
-  const productData={title,category,farm,video,strain,description,quantities,restock:adminRestockValue};const isBase=key&&!!BASE_PRODUCTS[key];const isCustom=key&&!!loadCustomProducts()[key];
-  if(isBase){const overrides=loadOverrides();overrides[key]={...productData,key};saveOverrides(overrides);}else if(isCustom){const custom=loadCustomProducts();custom[key]={...custom[key],...productData};saveCustomProducts(custom);}else{const newKey='custom_'+Date.now();const custom=loadCustomProducts();custom[newKey]={key:newKey,...productData};saveCustomProducts(custom);}
+  const productData={title,category,farm,video,strain,description,quantities,restock:adminRestockValue};const isBase=key&&!!BASE_PRODUCTS[key];const isCustom=key&&!!_fsCustom[key];
+  if(isBase){const overrides={..._fsOverrides};overrides[key]={...productData,key};saveOverrides(overrides);}
+  else if(isCustom){const custom={..._fsCustom};custom[key]={...custom[key],...productData};saveCustomProducts(custom);}
+  else{const newKey='custom_'+Date.now();const custom={..._fsCustom};custom[newKey]={key:newKey,...productData};saveCustomProducts(custom);}
   refreshProductData();renderAdminProductsList();closeAdminForm();showAdminToast('✅ Produit sauvegardé !');
 }
 window.saveAdminProduct=saveAdminProduct;window.openAdminForm=openAdminForm;window.closeAdminForm=closeAdminForm;window.deleteAdminProduct=deleteAdminProduct;window.toggleRestock=toggleRestock;
 function showAdminToast(msg){const t=document.getElementById('admin-toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
 
-document.addEventListener('DOMContentLoaded',()=>{
-  products=getAllProducts();populateFilters();renderProducts();updateBadge();goToHome();
-  const splash=document.getElementById('splash-screen');
-  setTimeout(()=>{splash.classList.add('hidden');setTimeout(()=>{splash.style.display='none';},700);},2600);
+// ═══ INIT — charge Firestore d'abord, puis affiche ═══
+document.addEventListener('DOMContentLoaded', async () => {
+  updateBadge();
+  // Attendre que Firebase soit prêt (module chargé)
+  let tries = 0;
+  while (!window.loadProductsFromFirestore && tries < 30) {
+    await new Promise(r => setTimeout(r, 100));
+    tries++;
+  }
+  await _loadFSData();
+  products = getAllProducts();
+  populateFilters();
+  renderProducts();
+  goToHome();
+  const splash = document.getElementById('splash-screen');
+  setTimeout(() => { splash.classList.add('hidden'); setTimeout(() => { splash.style.display = 'none'; }, 700); }, 2600);
 });
 </script>
 </body>
