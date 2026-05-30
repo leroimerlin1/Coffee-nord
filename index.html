@@ -328,7 +328,6 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
 .qty-type-badge{display:inline-block;font-size:0.65rem;font-weight:800;padding:2px 7px;border-radius:4px;margin-left:6px;vertical-align:middle;}
 .qty-type-badge.sur-place{background:rgba(200,146,42,0.12);border:1px solid rgba(200,146,42,0.4);color:var(--gold-light);}
 .qty-type-badge.livraison{background:rgba(41,182,246,0.1);border:1px solid rgba(41,182,246,0.35);color:#29b6f6;}
-/* ── Upload vidéo Cloudinary ── */
 .upload-btn{width:100%;margin-top:8px;padding:13px;background:rgba(200,146,42,0.08);border:1.5px dashed rgba(200,146,42,0.45);color:var(--gold);border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.88rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.2s;}
 .upload-btn:active{background:rgba(200,146,42,0.18);}
 .upload-progress-wrap{display:none;margin-top:10px;}
@@ -414,8 +413,6 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
         <label class="admin-label">Farm / Origine</label>
         <input class="admin-input" id="af-farm" placeholder="ex: Nord Farm">
       </div>
-
-      <!-- ══ CHAMP VIDÉO CLOUDINARY ══ -->
       <div class="admin-field">
         <label class="admin-label">📱 Vidéo du produit (Cloudinary)</label>
         <input class="admin-input" id="af-video" placeholder="URL auto après upload" style="margin-bottom:6px;">
@@ -433,7 +430,6 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
           <video id="video-preview" muted playsinline loop autoplay></video>
         </div>
       </div>
-
       <div class="admin-field">
         <label class="admin-label">Variétés / Strains</label>
         <textarea class="admin-input admin-textarea" id="af-strain" placeholder="- Variété 1&#10;- Variété 2"></textarea>
@@ -660,9 +656,6 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
 </div>
 
 <script>
-/* ═══════════════════════════════════════════════════
-   CLOUDINARY CONFIG
-═══════════════════════════════════════════════════ */
 const CLOUDINARY_CLOUD_NAME    = 'doc0z0zik';
 const CLOUDINARY_UPLOAD_PRESET = 'va4lj14h';
 
@@ -678,7 +671,152 @@ if (tg) {
   tgUser = tg.initDataUnsafe?.user || null;
 }
 
-const BASE_PRODUCTS = {};
+/* ═══════════════════════════════════════════════════
+   BASE PRODUCTS — 8 produits
+═══════════════════════════════════════════════════ */
+const BASE_PRODUCTS = {
+  blanche: {
+    key: 'blanche',
+    title: 'Blanche ❄️🇨🇴',
+    category: 'Cocaïne ❄️',
+    farm: 'Colombie 🇨🇴',
+    video: 'Blanche.MP4',
+    strain: '',
+    description: '',
+    restock: false,
+    quantities: [
+      {qty:'1G',  price:'40€',  type:'sur_place'},
+      {qty:'2G',  price:'80€',  type:'sur_place'},
+      {qty:'5G',  price:'150€', type:'sur_place'},
+      {qty:'10G', price:'280€', type:'sur_place'},
+      {qty:'1G',  price:'60€',  type:'livraison'},
+      {qty:'2G',  price:'100€', type:'livraison'},
+      {qty:'5G',  price:'170€', type:'livraison'},
+      {qty:'10G', price:'310€', type:'livraison'}
+    ]
+  },
+  mexicain_haze: {
+    key: 'mexicain_haze',
+    title: 'MEXICAIN HAZE 🇳🇱🇲🇽',
+    category: 'Weed 🌿',
+    farm: 'HAZE HOLLANDAISE ✅',
+    video: 'MEXICAIN HAZE.MP4',
+    strain: '',
+    description: 'DE RETOUR 🤝🤤\nBIEN CRAQUANTE 🔥 VRAI CAVIAR D\'ANCIEN 🫡',
+    restock: false,
+    quantities: [
+      {qty:'10G',  price:'60€',  type:'sur_place'},
+      {qty:'25G',  price:'120€', type:'sur_place'},
+      {qty:'50G',  price:'220€', type:'sur_place'},
+      {qty:'100G', price:'370€', type:'sur_place'},
+      {qty:'10G',  price:'80€',  type:'livraison'},
+      {qty:'25G',  price:'140€', type:'livraison'},
+      {qty:'50G',  price:'240€', type:'livraison'},
+      {qty:'100G', price:'400€', type:'livraison'}
+    ]
+  },
+  sherbato: {
+    key: 'sherbato',
+    title: 'SHERBATO 🇺🇸🍋🍹',
+    category: 'Weed 🌿',
+    farm: 'CALI USA 🇺🇸🌍',
+    video: 'SHERBATO.MP4',
+    strain: '',
+    description: 'TOP SHELF ✅\nEMPESTE LA SHOP 🚀\nSENT BIEN LE GOUT D\'UNE LIMONADE BIEN SUCRÉ 🤤',
+    restock: false,
+    quantities: [
+      {qty:'10G',  price:'70€',  type:'sur_place'},
+      {qty:'25G',  price:'140€', type:'sur_place'},
+      {qty:'50G',  price:'260€', type:'sur_place'},
+      {qty:'100G', price:'500€', type:'sur_place'},
+      {qty:'10G',  price:'90€',  type:'livraison'},
+      {qty:'25G',  price:'160€', type:'livraison'},
+      {qty:'50G',  price:'290€', type:'livraison'},
+      {qty:'100G', price:'520€', type:'livraison'}
+    ]
+  },
+  gummies: {
+    key: 'gummies',
+    title: 'GUMMIES 🇺🇸🍬',
+    category: 'Weed 🌿',
+    farm: 'CALI USA 🇺🇸🌍',
+    video: 'GUMMIES.MP4',
+    strain: '',
+    description: 'RESSENT BIEN LE GOÛT D\'UN MARSHMALLOW BIEN SUCRÉ 🤤 EMPESTE LA SHOP 🚀',
+    restock: false,
+    quantities: [
+      {qty:'10G',  price:'70€',  type:'sur_place'},
+      {qty:'25G',  price:'140€', type:'sur_place'},
+      {qty:'50G',  price:'260€', type:'sur_place'},
+      {qty:'100G', price:'500€', type:'sur_place'},
+      {qty:'10G',  price:'90€',  type:'livraison'},
+      {qty:'25G',  price:'160€', type:'livraison'},
+      {qty:'50G',  price:'290€', type:'livraison'},
+      {qty:'100G', price:'520€', type:'livraison'}
+    ]
+  },
+  gelato_lemon: {
+    key: 'gelato_lemon',
+    title: 'GELATO LEMON 🇺🇸🌍🍋',
+    category: 'Weed 🌿',
+    farm: 'CALI USA 🇺🇸🌍',
+    video: 'GELATO LEMON .MP4',
+    strain: '',
+    description: 'RESSENT BIEN LE GOÛT D\'UNE GLACE AU CITRON BIEN FRAÎCHE 💪🏻🤤 TOP SHELF CERTIFIÉE 🗽',
+    restock: false,
+    quantities: [
+      {qty:'5G',   price:'40€',  type:'sur_place'},
+      {qty:'10G',  price:'70€',  type:'sur_place'},
+      {qty:'25G',  price:'140€', type:'sur_place'},
+      {qty:'50G',  price:'260€', type:'sur_place'},
+      {qty:'100G', price:'490€', type:'sur_place'},
+      {qty:'10G',  price:'90€',  type:'livraison'},
+      {qty:'25G',  price:'160€', type:'livraison'},
+      {qty:'50G',  price:'290€', type:'livraison'},
+      {qty:'100G', price:'520€', type:'livraison'}
+    ]
+  },
+  white_truffle: {
+    key: 'white_truffle',
+    title: 'WHITE TRUFFLE 🇺🇸🤍',
+    category: 'Weed 🌿',
+    farm: 'CALI USA 🇺🇸🌍',
+    video: 'WHITE TRUFFLE.MP4',
+    strain: '',
+    description: 'RESSENT BIEN UN GOÛT DE BONBONS SUCRÉ 🤤 EMPESTE LA SHOP 🚀',
+    restock: false,
+    quantities: [
+      {qty:'10G',  price:'70€',  type:'sur_place'},
+      {qty:'25G',  price:'140€', type:'sur_place'},
+      {qty:'50G',  price:'260€', type:'sur_place'},
+      {qty:'100G', price:'500€', type:'sur_place'},
+      {qty:'10G',  price:'90€',  type:'livraison'},
+      {qty:'25G',  price:'160€', type:'livraison'},
+      {qty:'50G',  price:'290€', type:'livraison'},
+      {qty:'100G', price:'520€', type:'livraison'}
+    ]
+  },
+  dry_premium: {
+    key: 'dry_premium',
+    title: 'DRY PREMIUM 🇺🇸🌍🏆',
+    category: 'Weed 🌿',
+    farm: 'Hashki ⚡️',
+    video: 'DRY PRENIUM .MP4',
+    strain: '',
+    description: 'ODEUR ET GOÛT DE CALI BIEN FRUITÉ 🍇🍉🍓',
+    restock: false,
+    quantities: [
+      {qty:'10G',  price:'70€',  type:'sur_place'},
+      {qty:'25G',  price:'130€', type:'sur_place'},
+      {qty:'50G',  price:'210€', type:'sur_place'},
+      {qty:'100G', price:'330€', type:'sur_place'},
+      {qty:'10G',  price:'80€',  type:'livraison'},
+      {qty:'25G',  price:'140€', type:'livraison'},
+      {qty:'50G',  price:'230€', type:'livraison'},
+      {qty:'100G', price:'370€', type:'livraison'}
+    ]
+  }
+};
 
 let _fsCustom = {};
 let _fsDeleted = [];
@@ -1008,74 +1146,52 @@ document.querySelectorAll('.reseau-item[data-link]').forEach(el => {
   el.onclick = () => { const l = el.getAttribute('data-link'); if(tg) tg.openLink(l); else window.open(l,'_blank'); };
 });
 
-/* ═══════════════════════════════════════════════════
-   UPLOAD VIDÉO — Cloudinary (XHR pour progression)
-═══════════════════════════════════════════════════ */
+/* ═══ UPLOAD VIDÉO — Cloudinary ═══ */
 document.getElementById('af-video-file').addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
-
   const maxSize = 150 * 1024 * 1024;
-  if (file.size > maxSize) {
-    alert('⚠️ Vidéo trop lourde (max 150 MB). Compresse-la depuis ton iPhone.');
-    e.target.value = '';
-    return;
-  }
-
-  // Prévisualisation locale immédiate
+  if (file.size > maxSize) { alert('⚠️ Vidéo trop lourde (max 150 MB).'); e.target.value = ''; return; }
   const previewWrap = document.getElementById('video-preview-wrap');
   const previewVid  = document.getElementById('video-preview');
   previewVid.src = URL.createObjectURL(file);
   previewWrap.style.display = 'block';
-
-  // Barre de progression
   const progressWrap = document.getElementById('upload-progress-wrap');
   const progressBar  = document.getElementById('upload-progress-bar');
   const percentTxt   = document.getElementById('upload-percent-txt');
-  progressWrap.style.display   = 'block';
-  progressBar.style.width      = '0%';
+  progressWrap.style.display = 'block';
+  progressBar.style.width = '0%';
   progressBar.style.background = '';
-  percentTxt.textContent       = '0% — Démarrage...';
-
+  percentTxt.textContent = '0% — Démarrage...';
   const formData = new FormData();
   formData.append('file', file);
   formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-
   const xhr = new XMLHttpRequest();
   const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`;
-
   xhr.upload.addEventListener('progress', (event) => {
     if (event.lengthComputable) {
       const pct = Math.round((event.loaded / event.total) * 100);
       progressBar.style.width = pct + '%';
-      percentTxt.textContent  = pct + '% — Upload en cours... 📤';
+      percentTxt.textContent = pct + '% — Upload en cours... 📤';
     }
   });
-
   xhr.addEventListener('load', () => {
     if (xhr.status === 200) {
       const response = JSON.parse(xhr.responseText);
       const url = response.secure_url;
       document.getElementById('af-video').value = url;
-      percentTxt.textContent       = '✅ Upload terminé !';
-      progressBar.style.width      = '100%';
+      percentTxt.textContent = '✅ Upload terminé !';
+      progressBar.style.width = '100%';
       progressBar.style.background = 'var(--green-light)';
       previewVid.src = url;
       showAdminToast('✅ Vidéo uploadée sur Cloudinary !');
     } else {
-      console.error('Cloudinary error:', xhr.responseText);
-      percentTxt.textContent       = '❌ Erreur upload : ' + xhr.status;
+      percentTxt.textContent = '❌ Erreur upload : ' + xhr.status;
       progressBar.style.background = 'var(--red-deep)';
     }
     e.target.value = '';
   });
-
-  xhr.addEventListener('error', () => {
-    percentTxt.textContent       = '❌ Erreur réseau';
-    progressBar.style.background = 'var(--red-deep)';
-    e.target.value = '';
-  });
-
+  xhr.addEventListener('error', () => { percentTxt.textContent = '❌ Erreur réseau'; progressBar.style.background = 'var(--red-deep)'; e.target.value = ''; });
   xhr.open('POST', uploadUrl);
   xhr.send(formData);
 });
@@ -1141,15 +1257,12 @@ function openAdminForm(key) {
   formSection.style.display = 'block';
   formSection.scrollIntoView({behavior:'smooth'});
   document.getElementById('admin-edit-key').value = key || '';
-
-  // Reset upload UI
-  document.getElementById('upload-progress-wrap').style.display  = 'none';
-  document.getElementById('upload-progress-bar').style.width     = '0%';
+  document.getElementById('upload-progress-wrap').style.display = 'none';
+  document.getElementById('upload-progress-bar').style.width = '0%';
   document.getElementById('upload-progress-bar').style.background = '';
-  document.getElementById('upload-percent-txt').textContent      = '0%';
-  document.getElementById('video-preview-wrap').style.display    = 'none';
-  document.getElementById('video-preview').src                   = '';
-
+  document.getElementById('upload-percent-txt').textContent = '0%';
+  document.getElementById('video-preview-wrap').style.display = 'none';
+  document.getElementById('video-preview').src = '';
   if (key) {
     document.getElementById('admin-form-title').textContent = '✏️ Modifier le produit';
     const p = getAllProducts()[key];
@@ -1160,10 +1273,7 @@ function openAdminForm(key) {
     document.getElementById('af-strain').value      = p.strain      || '';
     document.getElementById('af-description').value = p.description || '';
     adminRestockValue = !!p.restock;
-    if (p.video) {
-      document.getElementById('video-preview').src = p.video;
-      document.getElementById('video-preview-wrap').style.display = 'block';
-    }
+    if (p.video) { document.getElementById('video-preview').src = p.video; document.getElementById('video-preview-wrap').style.display = 'block'; }
     renderQtyRows(p.quantities || []);
   } else {
     document.getElementById('admin-form-title').textContent = '➕ Nouveau produit';
@@ -1245,9 +1355,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await new Promise(r => setTimeout(r, 150));
     tries++;
   }
-  if (!window._db) {
-    await new Promise(r => setTimeout(r, 1000));
-  }
+  if (!window._db) { await new Promise(r => setTimeout(r, 1000)); }
   await _loadFSData();
   products = getAllProducts();
   populateFilters();
