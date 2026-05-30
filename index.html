@@ -8,7 +8,6 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, collection, addDoc, getDocs, orderBy, query, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDu_UUar4GTsLJCTvJmzIVFUySumGfGdMQ",
@@ -22,13 +21,8 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const storage = getStorage(app);
 
     window._db = db;
-    window._storage = storage;
-    window._storageRef = ref;
-    window._uploadBytesResumable = uploadBytesResumable;
-    window._getDownloadURL = getDownloadURL;
     window._fsCol = collection;
     window._fsAdd = addDoc;
     window._fsGet = getDocs;
@@ -334,7 +328,7 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
 .qty-type-badge{display:inline-block;font-size:0.65rem;font-weight:800;padding:2px 7px;border-radius:4px;margin-left:6px;vertical-align:middle;}
 .qty-type-badge.sur-place{background:rgba(200,146,42,0.12);border:1px solid rgba(200,146,42,0.4);color:var(--gold-light);}
 .qty-type-badge.livraison{background:rgba(41,182,246,0.1);border:1px solid rgba(41,182,246,0.35);color:#29b6f6;}
-/* ── Upload vidéo ── */
+/* ── Upload vidéo Cloudinary ── */
 .upload-btn{width:100%;margin-top:8px;padding:13px;background:rgba(200,146,42,0.08);border:1.5px dashed rgba(200,146,42,0.45);color:var(--gold);border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.88rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.2s;}
 .upload-btn:active{background:rgba(200,146,42,0.18);}
 .upload-progress-wrap{display:none;margin-top:10px;}
@@ -421,10 +415,10 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
         <input class="admin-input" id="af-farm" placeholder="ex: Nord Farm">
       </div>
 
-      <!-- ══ CHAMP VIDÉO AVEC UPLOAD ══ -->
+      <!-- ══ CHAMP VIDÉO CLOUDINARY ══ -->
       <div class="admin-field">
-        <label class="admin-label">📱 Vidéo du produit</label>
-        <input class="admin-input" id="af-video" placeholder="URL auto après upload (ou colle une URL)" style="margin-bottom:6px;">
+        <label class="admin-label">📱 Vidéo du produit (Cloudinary)</label>
+        <input class="admin-input" id="af-video" placeholder="URL auto après upload" style="margin-bottom:6px;">
         <input type="file" id="af-video-file" accept="video/*" style="display:none">
         <button type="button" class="upload-btn" onclick="document.getElementById('af-video-file').click()">
           📱 Choisir une vidéo depuis iPhone / Galerie
@@ -666,6 +660,12 @@ nav::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1.5px;b
 </div>
 
 <script>
+/* ═══════════════════════════════════════════════════
+   CLOUDINARY CONFIG
+═══════════════════════════════════════════════════ */
+const CLOUDINARY_CLOUD_NAME    = 'doc0z0zik';
+const CLOUDINARY_UPLOAD_PRESET = 'va4lj14h';
+
 const tg = window.Telegram?.WebApp;
 let tgUser = null;
 if (tg) {
@@ -680,9 +680,6 @@ if (tg) {
 
 const BASE_PRODUCTS = {};
 
-// ═══════════════════════════════════════════════════
-// STOCKAGE FIRESTORE
-// ═══════════════════════════════════════════════════
 let _fsCustom = {};
 let _fsDeleted = [];
 let _fsOverrides = {};
@@ -1011,14 +1008,14 @@ document.querySelectorAll('.reseau-item[data-link]').forEach(el => {
   el.onclick = () => { const l = el.getAttribute('data-link'); if(tg) tg.openLink(l); else window.open(l,'_blank'); };
 });
 
-/* ═══════════════════════════════════════
-   UPLOAD VIDÉO — Firebase Storage
-═══════════════════════════════════════ */
-document.getElementById('af-video-file').addEventListener('change', async (e) => {
+/* ═══════════════════════════════════════════════════
+   UPLOAD VIDÉO — Cloudinary (XHR pour progression)
+═══════════════════════════════════════════════════ */
+document.getElementById('af-video-file').addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
 
-  const maxSize = 150 * 1024 * 1024; // 150 MB
+  const maxSize = 150 * 1024 * 1024;
   if (file.size > maxSize) {
     alert('⚠️ Vidéo trop lourde (max 150 MB). Compresse-la depuis ton iPhone.');
     e.target.value = '';
@@ -1035,37 +1032,52 @@ document.getElementById('af-video-file').addEventListener('change', async (e) =>
   const progressWrap = document.getElementById('upload-progress-wrap');
   const progressBar  = document.getElementById('upload-progress-bar');
   const percentTxt   = document.getElementById('upload-percent-txt');
-  progressWrap.style.display = 'block';
-  progressBar.style.width    = '0%';
-  percentTxt.textContent     = '0% — Démarrage...';
+  progressWrap.style.display   = 'block';
+  progressBar.style.width      = '0%';
+  progressBar.style.background = '';
+  percentTxt.textContent       = '0% — Démarrage...';
 
-  const fileName   = 'videos/' + Date.now() + '_' + file.name.replace(/\s+/g, '_');
-  const storageRef = window._storageRef(window._storage, fileName);
-  const uploadTask = window._uploadBytesResumable(storageRef, file);
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
 
-  uploadTask.on(
-    'state_changed',
-    (snapshot) => {
-      const pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-      progressBar.style.width  = pct + '%';
-      percentTxt.textContent   = pct + '% — Upload en cours... 📤';
-    },
-    (error) => {
-      console.error('Upload error:', error);
-      percentTxt.textContent = '❌ Erreur : ' + error.message;
-      progressBar.style.background = 'var(--red-deep)';
-    },
-    async () => {
-      const url = await window._getDownloadURL(uploadTask.snapshot.ref);
-      document.getElementById('af-video').value = url;
-      percentTxt.textContent     = '✅ Upload terminé !';
-      progressBar.style.width    = '100%';
-      progressBar.style.background = 'var(--green-light)';
-      showAdminToast('✅ Vidéo uploadée !');
-      // Reset input pour permettre re-upload
-      e.target.value = '';
+  const xhr = new XMLHttpRequest();
+  const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`;
+
+  xhr.upload.addEventListener('progress', (event) => {
+    if (event.lengthComputable) {
+      const pct = Math.round((event.loaded / event.total) * 100);
+      progressBar.style.width = pct + '%';
+      percentTxt.textContent  = pct + '% — Upload en cours... 📤';
     }
-  );
+  });
+
+  xhr.addEventListener('load', () => {
+    if (xhr.status === 200) {
+      const response = JSON.parse(xhr.responseText);
+      const url = response.secure_url;
+      document.getElementById('af-video').value = url;
+      percentTxt.textContent       = '✅ Upload terminé !';
+      progressBar.style.width      = '100%';
+      progressBar.style.background = 'var(--green-light)';
+      previewVid.src = url;
+      showAdminToast('✅ Vidéo uploadée sur Cloudinary !');
+    } else {
+      console.error('Cloudinary error:', xhr.responseText);
+      percentTxt.textContent       = '❌ Erreur upload : ' + xhr.status;
+      progressBar.style.background = 'var(--red-deep)';
+    }
+    e.target.value = '';
+  });
+
+  xhr.addEventListener('error', () => {
+    percentTxt.textContent       = '❌ Erreur réseau';
+    progressBar.style.background = 'var(--red-deep)';
+    e.target.value = '';
+  });
+
+  xhr.open('POST', uploadUrl);
+  xhr.send(formData);
 });
 
 /* ═══ ADMIN ═══ */
@@ -1131,12 +1143,12 @@ function openAdminForm(key) {
   document.getElementById('admin-edit-key').value = key || '';
 
   // Reset upload UI
-  document.getElementById('upload-progress-wrap').style.display = 'none';
-  document.getElementById('upload-progress-bar').style.width = '0%';
+  document.getElementById('upload-progress-wrap').style.display  = 'none';
+  document.getElementById('upload-progress-bar').style.width     = '0%';
   document.getElementById('upload-progress-bar').style.background = '';
-  document.getElementById('upload-percent-txt').textContent = '0%';
-  document.getElementById('video-preview-wrap').style.display = 'none';
-  document.getElementById('video-preview').src = '';
+  document.getElementById('upload-percent-txt').textContent      = '0%';
+  document.getElementById('video-preview-wrap').style.display    = 'none';
+  document.getElementById('video-preview').src                   = '';
 
   if (key) {
     document.getElementById('admin-form-title').textContent = '✏️ Modifier le produit';
@@ -1148,10 +1160,8 @@ function openAdminForm(key) {
     document.getElementById('af-strain').value      = p.strain      || '';
     document.getElementById('af-description').value = p.description || '';
     adminRestockValue = !!p.restock;
-    // Prévisualiser la vidéo existante
     if (p.video) {
-      const previewVid = document.getElementById('video-preview');
-      previewVid.src = p.video;
+      document.getElementById('video-preview').src = p.video;
       document.getElementById('video-preview-wrap').style.display = 'block';
     }
     renderQtyRows(p.quantities || []);
@@ -1163,9 +1173,7 @@ function openAdminForm(key) {
   }
   updateRestockButtons();
 }
-function closeAdminForm() {
-  document.getElementById('admin-form-section').style.display = 'none';
-}
+function closeAdminForm() { document.getElementById('admin-form-section').style.display = 'none'; }
 function setRestockAdmin(val) { adminRestockValue = val; updateRestockButtons(); }
 function updateRestockButtons() {
   document.getElementById('restock-no').classList.toggle('active', !adminRestockValue);
@@ -1232,13 +1240,11 @@ function showAdminToast(msg) {
 /* ═══ INIT ═══ */
 document.addEventListener('DOMContentLoaded', async () => {
   updateBadge();
-  // Attendre que Firebase soit initialisé
   let tries = 0;
   while (!window.loadProductsFromFirestore && tries < 50) {
     await new Promise(r => setTimeout(r, 150));
     tries++;
   }
-  // Attendre que Firestore DB soit prêt
   if (!window._db) {
     await new Promise(r => setTimeout(r, 1000));
   }
