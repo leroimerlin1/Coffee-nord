@@ -27,7 +27,7 @@ TOKEN = "8887930553:AAHw4n1_BGv8r-XPPWD1qTg342N9FpP0loY"
 CHANNEL_LINK = "https://t.me/+xkLrkV6xQBQ2OTQ0"
 MINI_APP_URL = "https://leroimerlin1.github.io/Coffee-nord/"
 IMAGE_WELCOME = "chat1.png"
-ADMIN_ID = 7457384429
+ADMIN_ID = 8711710976
 DB_PATH = "users.db"
 
 DAILY_MESSAGE = """✅ Les commandes sont ouvertes 📦
